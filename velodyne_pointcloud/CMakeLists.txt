@@ -16,31 +16,24 @@ find_package(catkin REQUIRED COMPONENTS
              ${${PROJECT_NAME}_CATKIN_DEPS} pcl_conversions)
 find_package(Boost COMPONENTS signals)
 
-# Resolve system dependency on yaml-cpp, which apparently does not
-# provide a CMake find_package() module.
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(YAML_CPP REQUIRED yaml-cpp)
-find_path(YAML_CPP_INCLUDE_DIR
-          NAMES yaml_cpp.h
-          PATHS ${YAML_CPP_INCLUDE_DIRS})
-find_library(YAML_CPP_LIBRARY
-             NAMES YAML_CPP
-             PATHS ${YAML_CPP_LIBRARY_DIRS})
+#Add yaml-cpp 0.3.0 as a subdirectory (as static allways)
+set(BUILD_SHARED_LIBS_SAVED "${BUILD_SHARED_LIBS}")
+set(BUILD_SHARED_LIBS OFF)
+#TODO should set -fPIC here instead of changing the yaml-library cmake files!
+add_subdirectory(../3dParty/yaml-cpp ${CMAKE_BINARY_DIR}/yaml-cpp)
+set(BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS_SAVED}")
 
-link_directories(${YAML_CPP_LIBRARY_DIRS})
+set(YAML_CPP_INCLUDE_DIRS "../3dParty/yaml-cpp/include")
+set(YAML_CPP_LIBRARIES yaml-cpp)
 
 generate_dynamic_reconfigure_options(
   cfg/VelodyneConfig.cfg)
 
-if(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
-add_definitions(-DHAVE_NEW_YAMLCPP)
-endif(NOT ${YAML_CPP_VERSION} VERSION_LESS "0.5")
-
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${YAML_CPP_INCLUDE_DIRS})
 
 catkin_package(
     CATKIN_DEPENDS ${${PROJECT_NAME}_CATKIN_DEPS}
-    DEPENDS yaml-cpp python-yaml
+    DEPENDS python-yaml
     INCLUDE_DIRS include
     LIBRARIES velodyne_rawdata)
     

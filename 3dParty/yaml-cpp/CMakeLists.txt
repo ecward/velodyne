@@ -87,6 +87,7 @@ include_directories(${YAML_CPP_SOURCE_DIR}/src)
 if(BUILD_SHARED_LIBS)
 	set(LABEL_SUFFIX "shared")
 else()
+        add_definitions(-fPIC)
 	set(LABEL_SUFFIX "static")
 endif()
 
